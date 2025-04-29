@@ -244,7 +244,7 @@ int main() {
         cout << "=== Lehrer-Schueler-Verwaltung ===" << endl;
         cout << "[1] Schueler anlegen" << endl;
         cout << "[2] Alle Schueler anzeigen" << endl;
-        cout << "[3] Einen Schueler suchen" << endl;
+        cout << "[3] Einen Schueler suchen und Löschen" << endl;
         cout << "[4] Sprung 1 eintragen" << endl;
         cout << "[5] Sprung 2 eintragen" << endl;
         cout << "[0] Beenden" << endl;
