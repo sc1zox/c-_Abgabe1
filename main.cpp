@@ -154,7 +154,7 @@ public:
 
     Schueler* schuelerSuchenByName(string vorname,string nachname);
 
-    void schuelerLoeschen(string vorname,string name);
+    bool schuelerLoeschen(string vorname,string name);
 
     Lehrer() : schueler{}, anzahl_schueler(0), bestPerformance(Schueler()), bestImprovement(Schueler()) {
     }
@@ -182,15 +182,17 @@ public:
 
 int Lehrer::max_schueler = 50;
 
-void Lehrer::schuelerLoeschen(string vorname, string name) {
+// Schueler überschreiben mit letztem array eintrag
+bool Lehrer::schuelerLoeschen(string vorname, string name) {
     for (int i = 0; i < anzahl_schueler; i++) {
         if (schueler[i].getName() == name && schueler[i].getVorname() == vorname) {
             schueler[i] = schueler[anzahl_schueler - 1];
             anzahl_schueler--;
             cout << "Schueler wurde geloescht." << endl;
-            return;
+            return true;
         }
     }
+    return false;
     cout << "Schueler nicht gefunden!" << endl;
 }
 
@@ -215,7 +217,8 @@ Schueler* Lehrer::schuelerSuchenByName(string vorname, string nachname) {
             return &schueler[i];
         }
     }
-    throw out_of_range("Schueler name not found");
+    cout<< "Schueler nicht gefunden!" << endl;
+    return nullptr; // damit programm nicht abstürzt, null check in main
 }
 
 // Funktion alle Schueler ausgeben
@@ -244,7 +247,7 @@ int main() {
         cout << "=== Lehrer-Schueler-Verwaltung ===" << endl;
         cout << "[1] Schueler anlegen" << endl;
         cout << "[2] Alle Schueler anzeigen" << endl;
-        cout << "[3] Einen Schueler suchen und Löschen" << endl;
+        cout << "[3] Einen Schueler suchen und Loeschen" << endl;
         cout << "[4] Sprung 1 eintragen" << endl;
         cout << "[5] Sprung 2 eintragen" << endl;
         cout << "[0] Beenden" << endl;
@@ -276,7 +279,7 @@ int main() {
                 break;
             }
             case 3: {
-                cout << "\n--- Einen Schueler suchen und Löschen ---" << endl;
+                cout << "\n--- Einen Schueler suchen und Loeschen ---" << endl;
                 string name, vorname;
 
                 cout << "\n--- Name und Vorname bitte eingeben ---" << endl;
@@ -286,8 +289,10 @@ int main() {
                 cin >> name;
 
                 Schueler* found = meinLehrer.schuelerSuchenByName(vorname, name);
+                if (found) {
                     cout << "Schueler gefunden!" << endl;
                     found->anzeigen();
+                }
 
                 int subauswahl = -1;
 
@@ -298,8 +303,16 @@ int main() {
                     cin >> subauswahl;
                     switch (subauswahl) {
                         case 1: {
-                            meinLehrer.schuelerLoeschen(found->getVorname(), found->getName());
-                            cout << "\n--- Schueler geloescht ---" << endl;
+                            // null pointer check
+                            if (!found) {
+                                cout << "Schueler nicht gefunden!" << endl;
+                                break;
+                            }
+                            bool isDeleted = meinLehrer.schuelerLoeschen(found->getVorname(), found->getName());
+                            if (isDeleted) {
+                                cout << "\n--- Schueler geloescht ---" << endl;
+                            }
+                            subauswahl = 0;
                             break;
                         }
                         case 0: {
