@@ -152,33 +152,49 @@ public:
 
     void alleSchuelerAnzeigen();
 
-    Schueler schuelerSuchenByName(string vorname,string nachname);
+    Schueler* schuelerSuchenByName(string vorname,string nachname);
+
+    void schuelerLoeschen(string vorname,string name);
 
     Lehrer() : schueler{}, anzahl_schueler(0), bestPerformance(Schueler()), bestImprovement(Schueler()) {
     }
 
     // getter
-    Schueler* get_Schueler(int index) {
+    Schueler* getSchueler(int index) {
         if (index >= 0 && index < anzahl_schueler) {
             return &schueler[index];
         }
         throw out_of_range("Schueler index out of range");
     }
 
-    Schueler get_BestPerformance() {
+    Schueler getBestPerformance() {
         return bestPerformance;
     }
 
-    Schueler get_BestImprovement() {
+    Schueler getBestImprovement() {
         return bestImprovement;
     }
 
-    int get_anzahl_schueler() {
+    int getAnzahlSchueler() {
         return anzahl_schueler;
     }
 };
 
 int Lehrer::max_schueler = 50;
+
+void Lehrer::schuelerLoeschen(string vorname, string name) {
+    for (int i = 0; i < anzahl_schueler; i++) {
+        if (schueler[i].getName() == name && schueler[i].getVorname() == vorname) {
+            schueler[i] = schueler[anzahl_schueler - 1];
+            anzahl_schueler--;
+            cout << "Schueler wurde geloescht." << endl;
+            return;
+        }
+    }
+    cout << "Schueler nicht gefunden!" << endl;
+}
+
+
 
 // Pokal vergeben
 void Lehrer::calculatePrice() {
@@ -192,11 +208,11 @@ void Lehrer::calculatePrice() {
     }
 }
 
-// Funktion um einen Schueler zu suchen
-Schueler Lehrer::schuelerSuchenByName(string vorname, string nachname) {
+// Funktion um einen Schueler zu suchen, Adresse zurück geben um Wert zu beschreiben
+Schueler* Lehrer::schuelerSuchenByName(string vorname, string nachname) {
     for (int i = 0; i < anzahl_schueler; i++) {
         if (schueler[i].getName() == nachname && schueler[i].getVorname() == vorname) {
-            return schueler[i];
+            return &schueler[i];
         }
     }
     throw out_of_range("Schueler name not found");
@@ -260,7 +276,7 @@ int main() {
                 break;
             }
             case 3: {
-                cout << "\n--- Einen Schueler suchen ---" << endl;
+                cout << "\n--- Einen Schueler suchen und Löschen ---" << endl;
                 string name, vorname;
 
                 cout << "\n--- Name und Vorname bitte eingeben ---" << endl;
@@ -269,9 +285,9 @@ int main() {
                 cout << "Nachname: ";
                 cin >> name;
 
-                Schueler found = meinLehrer.schuelerSuchenByName(vorname, name);
+                Schueler* found = meinLehrer.schuelerSuchenByName(vorname, name);
                     cout << "Schueler gefunden!" << endl;
-                    found.anzeigen();
+                    found->anzeigen();
 
                 int subauswahl = -1;
 
@@ -282,7 +298,7 @@ int main() {
                     cin >> subauswahl;
                     switch (subauswahl) {
                         case 1: {
-                            //TODO schüler löschen
+                            meinLehrer.schuelerLoeschen(found->getVorname(), found->getName());
                             cout << "\n--- Schueler geloescht ---" << endl;
                             break;
                         }
@@ -300,10 +316,10 @@ int main() {
             case 4: {
                 cout << "\n--- Sprung 1 eintragen ---" << endl;
                 int counter = 0;
-                int maxCount = meinLehrer.get_anzahl_schueler();
+                int maxCount = meinLehrer.getAnzahlSchueler();
                 float sprungNeu;
                 do {
-                    Schueler* tmp = meinLehrer.get_Schueler(counter);  // Pointer holen um Sprung reinzueschreiben, da sonst copy by value
+                    Schueler* tmp = meinLehrer.getSchueler(counter);  // Pointer holen um Sprung reinzueschreiben, da sonst copy by value
                     if (tmp->getSprung1() == 0) {
                         cout << "\n Fuer Schueler: " << endl;
                         cout << tmp->getVorname() + " " + tmp->getName();
@@ -319,10 +335,10 @@ int main() {
             case 5: {
                 cout << "\n--- Sprung 2 eintragen ---" << endl;
                 int counter = 0;
-                int maxCount = meinLehrer.get_anzahl_schueler();
+                int maxCount = meinLehrer.getAnzahlSchueler();
                 float sprungNeu;
                 do {
-                    Schueler* tmp = meinLehrer.get_Schueler(counter); // Pointer holen um Sprung reinzueschreiben, da sonst copy by value
+                    Schueler* tmp = meinLehrer.getSchueler(counter); // Pointer holen um Sprung reinzueschreiben, da sonst copy by value
                     if (tmp->getSprung2() == 0) {
                         cout << "\n Fuer Schueler: " << endl;
                         cout << tmp->getVorname() + " " + tmp->getName();
@@ -338,8 +354,8 @@ int main() {
             case 0: {
                 cout << "Programm wird beendet." << endl;
                 meinLehrer.calculatePrice(); //Hier wird der Pokal "vergeben"
-                Schueler tmp = meinLehrer.get_BestImprovement(); // Beste Steigerung wird geholt
-                Schueler tmp2 = meinLehrer.get_BestPerformance(); // Beste Leistung wird geholt
+                Schueler tmp = meinLehrer.getBestImprovement(); // Beste Steigerung wird geholt
+                Schueler tmp2 = meinLehrer.getBestPerformance(); // Beste Leistung wird geholt
                 cout << "Beste Verbesserung: " << endl;
                 tmp2.anzeigen();
 
