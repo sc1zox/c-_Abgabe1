@@ -2,8 +2,6 @@
 #include <utility>
 using namespace std;
 
-constexpr int max_count = 50;
-
 class Date {
 private:
     //Datumseigenschaften
@@ -12,16 +10,16 @@ private:
     int Jahr;
 
 public:
-    string printDate() const;
+    string printDate();
 
-    Date(const int TagInput, const int MonatInput, const int JahrInput) {
+    Date(int TagInput,int MonatInput,int JahrInput) {
         Tag = TagInput;
         Monat = MonatInput;
         Jahr = JahrInput;
     }
 };
 
-string Date::printDate() const {
+string Date::printDate() {
     return to_string(Tag) + "." + to_string(Monat) + "." + to_string(Jahr);
 }
 
@@ -41,8 +39,8 @@ private:
     string name;
     string vorname;
     Date Geburtsdatum;
-    float Sprung1{0};
-    float Sprung2{0};
+    float Sprung1;
+    float Sprung2;
     Note_Enum NoteJump;
     Note_Enum NoteImprovement;
     Note_Enum NoteHighest;
@@ -60,29 +58,29 @@ public:
     }
 
     // Konstruktor mit Parameter, used compiler optimization to pass by value and not copy it
-    Schueler(const Date &geb, string nameNeu, string vornameNeu)
-        : Geburtsdatum(geb), name(std::move(nameNeu)), vorname(std::move(vornameNeu)),
+    Schueler(Date geb, string nameNeu, string vornameNeu)
+        : Geburtsdatum(geb), name(nameNeu), vorname(vornameNeu),
           NoteJump(KEINE_NOTE), NoteImprovement(KEINE_NOTE), NoteHighest(KEINE_NOTE) {
     }
 
 
     //setter
-    void setSprung1(const float sprung1) {
+    void setSprung1(float sprung1) {
         Sprung1 = sprung1;
     }
 
-    void setSprung2(const float sprung2) {
+    void setSprung2(float sprung2) {
         Sprung2 = sprung2;
     }
 
-    void setNote(const Note_Enum noteNew) {
+    void setNote(Note_Enum noteNew) {
         NoteJump = noteNew;
     }
 
     //getter
-    string getName() const { return name; }
+    string getName() { return name; }
 
-    string getVorname() const { return vorname; }
+    string getVorname() { return vorname; }
 
     float getSprung1() { return Sprung1; }
     float getSprung2() { return Sprung2; }
@@ -111,19 +109,21 @@ void Schueler::calculateIncrease() {
 
 
 void Schueler::calculateNote() {
+    float sprung1 = getSprung1();
     float sprung2 = getSprung2();
+    float besterSprung = sprung1 >= sprung2 ? sprung1 : sprung2;
 
-    if (sprung2 < 3.00)
+    if (besterSprung < 3.00)
         NoteJump = UNGENUEGEND;
-    else if (sprung2 < 3.49)
+    else if (besterSprung < 3.49)
         NoteJump = MANGELHAFT;
-    else if (sprung2 < 3.99)
+    else if (besterSprung < 3.99)
         NoteJump = AUSREICHEND;
-    else if (sprung2 < 4.49)
+    else if (besterSprung < 4.49)
         NoteJump = BEFRIEDIGEND;
-    else if (sprung2 < 4.99)
+    else if (besterSprung < 4.99)
         NoteJump = GUT;
-    else if (sprung2 >= 5)
+    else if (besterSprung >= 5)
         NoteJump = SEHR_GUT;
     else
         NoteJump = KEINE_NOTE;
@@ -139,64 +139,67 @@ void Schueler::anzeigen() {
 
 class Lehrer {
 private:
-    Schueler schueler[max_count]; // Array von bis zu 100 Schülern
+    static int max_schueler;
+    Schueler schueler[50]; // Array von bis zu 50 Schülern
     int anzahl_schueler; // Anzahl der hinzugefügten Schüler
     Schueler bestPerformance;
     Schueler bestImprovement;
 
 public:
-    void schuelerAnlegen(const Schueler &SchuelerNeu);
+    void schuelerAnlegen(Schueler SchuelerNeu);
 
     void calculatePrice();
 
     void alleSchuelerAnzeigen();
 
-    Schueler *schuelerSuchenByName(const string &vorname, const string &nachname);
+    Schueler schuelerSuchenByName(string vorname,string nachname);
 
     Lehrer() : schueler{}, anzahl_schueler(0), bestPerformance(Schueler()), bestImprovement(Schueler()) {
     }
 
     // getter
-    Schueler &get_Schueler(const int index) {
+    Schueler* get_Schueler(int index) {
         if (index >= 0 && index < anzahl_schueler) {
-            return schueler[index];
+            return &schueler[index];
         }
         throw out_of_range("Schueler index out of range");
     }
 
-    Schueler &get_BestPerformance() {
+    Schueler get_BestPerformance() {
         return bestPerformance;
     }
 
-    Schueler &get_BestImprovement() {
+    Schueler get_BestImprovement() {
         return bestImprovement;
     }
 
-    int get_anzahl_schueler() const {
+    int get_anzahl_schueler() {
         return anzahl_schueler;
     }
 };
 
+int Lehrer::max_schueler = 50;
+
 // Pokal vergeben
 void Lehrer::calculatePrice() {
     for (int i = 0; i < anzahl_schueler; i++) {
-        if (schueler[i].getNoteJump() < bestPerformance.getNoteJump()) {
+        if (schueler[i].getNoteJump() <= bestPerformance.getNoteJump()) {
             bestPerformance = schueler[i];
         }
-        if (schueler[i].getNoteImprovement() < bestPerformance.getNoteImprovement()) {
+        if (schueler[i].getNoteImprovement() <= bestPerformance.getNoteImprovement()) {
             bestImprovement = schueler[i];
         }
     }
 }
 
 // Funktion um einen Schueler zu suchen
-Schueler *Lehrer::schuelerSuchenByName(const string &vorname, const string &nachname) {
+Schueler Lehrer::schuelerSuchenByName(string vorname, string nachname) {
     for (int i = 0; i < anzahl_schueler; i++) {
         if (schueler[i].getName() == nachname && schueler[i].getVorname() == vorname) {
-            return &schueler[i];
+            return schueler[i];
         }
     }
-    return nullptr;
+    throw out_of_range("Schueler name not found");
 }
 
 // Funktion alle Schueler ausgeben
@@ -207,8 +210,8 @@ void Lehrer::alleSchuelerAnzeigen() {
 }
 
 // Funktion zum Anlegen
-void Lehrer::schuelerAnlegen(const Schueler &SchuelerNeu) {
-    if (anzahl_schueler < max_count) {
+void Lehrer::schuelerAnlegen(Schueler SchuelerNeu) {
+    if (anzahl_schueler < max_schueler) {
         schueler[anzahl_schueler] = SchuelerNeu;
         anzahl_schueler++;
     } else {
@@ -246,7 +249,7 @@ int main() {
                 cin >> tag >> monat >> jahr;
 
                 Date geb(tag, monat, jahr);
-                Schueler neuerSchueler(geb, vorname, name);
+                Schueler neuerSchueler(geb, name,vorname );
                 meinLehrer.schuelerAnlegen(neuerSchueler);
                 cout << "Schueler wurde angelegt!" << endl;
                 break;
@@ -266,12 +269,31 @@ int main() {
                 cout << "Nachname: ";
                 cin >> name;
 
-                Schueler *found = meinLehrer.schuelerSuchenByName(vorname, name);
-                if (found == nullptr) {
-                    cout << "Schueler konnte nicht gefunden werden!" << endl;
-                } else {
+                Schueler found = meinLehrer.schuelerSuchenByName(vorname, name);
                     cout << "Schueler gefunden!" << endl;
-                    found->anzeigen();
+                    found.anzeigen();
+
+                int subauswahl = -1;
+
+                while (subauswahl != 0) {
+                    cout << "=== Schueler-Verwaltung ===" << endl;
+                    cout << "[1] Schueler loeschen" << endl;
+                    cout << "[0] zurueck ins Hauptmenu"  << endl;
+                    cin >> subauswahl;
+                    switch (subauswahl) {
+                        case 1: {
+                            //TODO schüler löschen
+                            cout << "\n--- Schueler geloescht ---" << endl;
+                            break;
+                        }
+                        case 0: {
+                            cout << "zurueck!" << endl;
+                            break;
+                        }
+                        default:
+                            cout << "Ungueltige Auswahl!" << endl;
+                            break;
+                    }
                 }
                 break;
             }
@@ -281,13 +303,13 @@ int main() {
                 int maxCount = meinLehrer.get_anzahl_schueler();
                 float sprungNeu;
                 do {
-                    Schueler &tmp = meinLehrer.get_Schueler(counter); // Adresse holen
-                    if (tmp.getSprung1() == 0) {
+                    Schueler* tmp = meinLehrer.get_Schueler(counter);  // Pointer holen um Sprung reinzueschreiben, da sonst copy by value
+                    if (tmp->getSprung1() == 0) {
                         cout << "\n Fuer Schueler: " << endl;
-                        cout << tmp.getVorname() + " " + tmp.getName();
+                        cout << tmp->getVorname() + " " + tmp->getName();
                         cout << "\n Sprung 1 eintragen: " << endl;
                         cin >> sprungNeu;
-                        tmp.setSprung1(sprungNeu);
+                        tmp->setSprung1(sprungNeu);
                     }
                     counter++;
                 } while (counter < maxCount);
@@ -300,13 +322,13 @@ int main() {
                 int maxCount = meinLehrer.get_anzahl_schueler();
                 float sprungNeu;
                 do {
-                    Schueler &tmp = meinLehrer.get_Schueler(counter); // Adresse holen
-                    if (tmp.getSprung2() == 0) {
+                    Schueler* tmp = meinLehrer.get_Schueler(counter); // Pointer holen um Sprung reinzueschreiben, da sonst copy by value
+                    if (tmp->getSprung2() == 0) {
                         cout << "\n Fuer Schueler: " << endl;
-                        cout << tmp.getVorname() + " " + tmp.getName();
+                        cout << tmp->getVorname() + " " + tmp->getName();
                         cout << "\n Sprung 2 eintragen: " << endl;
                         cin >> sprungNeu;
-                        tmp.setSprung2(sprungNeu);
+                        tmp->setSprung2(sprungNeu);
                     }
                     counter++;
                 } while (counter < maxCount);
@@ -316,17 +338,18 @@ int main() {
             case 0: {
                 cout << "Programm wird beendet." << endl;
                 meinLehrer.calculatePrice(); //Hier wird der Pokal "vergeben"
-                Schueler &tmp = meinLehrer.get_BestImprovement(); // Beste Leistung wird geholt
-                Schueler &tmp2 = meinLehrer.get_BestPerformance(); // Beste Steigerung wird geholt
-                cout << "Beste Leistung: " << endl;
+                Schueler tmp = meinLehrer.get_BestImprovement(); // Beste Steigerung wird geholt
+                Schueler tmp2 = meinLehrer.get_BestPerformance(); // Beste Leistung wird geholt
+                cout << "Beste Verbesserung: " << endl;
                 tmp2.anzeigen();
 
-                cout << "Beste Performance: " << endl;
+                cout << "Beste Leistung: " << endl;
                 tmp.anzeigen();
                 break;
             }
             default:
                 cout << "Ungueltige Auswahl!" << endl;
+                break;
         }
     }
 
