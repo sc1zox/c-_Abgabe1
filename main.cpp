@@ -1,5 +1,4 @@
 #include<iostream>
-#include <utility>
 using namespace std;
 
 class Date {
@@ -10,8 +9,10 @@ private:
     int Jahr;
 
 public:
-    string printDate();
+    //Forward Deklaration damit Compiler bescheid weiß
+    string printDate() const;
 
+    // Konstruktor um die privaten Attribute bei initalisierung zu setzen
     Date(int TagInput,int MonatInput,int JahrInput) {
         Tag = TagInput;
         Monat = MonatInput;
@@ -19,7 +20,8 @@ public:
     }
 };
 
-string Date::printDate() {
+// Methodenimpl außerhalb der Klasse, Date:: um Zugehörigkeit zu definieren + const um zu signalisieren, dass die Methode das Objekt nicht aendert.
+string Date::printDate() const {
     return to_string(Tag) + "." + to_string(Monat) + "." + to_string(Jahr);
 }
 
@@ -46,6 +48,7 @@ private:
     Note_Enum NoteHighest;
 
 public:
+    //Forward Deklaration damit Compiler bescheid weiß
     void calculateNote();
 
     void calculateIncrease();
@@ -57,14 +60,14 @@ public:
                  NoteImprovement(KEINE_NOTE), NoteHighest(KEINE_NOTE) {
     }
 
-    // Konstruktor mit Parameter, used compiler optimization to pass by value and not copy it
+    // Konstruktor mit Parameter
     Schueler(Date geb, string nameNeu, string vornameNeu)
         : Geburtsdatum(geb), name(nameNeu), vorname(vornameNeu),
           NoteJump(KEINE_NOTE), NoteImprovement(KEINE_NOTE), NoteHighest(KEINE_NOTE) {
     }
 
 
-    //setter
+    //setter Methoden
     void setSprung1(float sprung1) {
         Sprung1 = sprung1;
     }
@@ -77,7 +80,7 @@ public:
         NoteJump = noteNew;
     }
 
-    //getter
+    //getter Methoden
     string getName() { return name; }
 
     string getVorname() { return vorname; }
@@ -88,6 +91,7 @@ public:
     Note_Enum getNoteImprovement() { return NoteImprovement; }
 };
 
+// Berechnung der Verbesserung eines Schuelers
 void Schueler::calculateIncrease() {
     float sprung1 = getSprung1();
     float sprung2 = getSprung2();
@@ -107,10 +111,11 @@ void Schueler::calculateIncrease() {
         NoteImprovement = SEHR_GUT;
 }
 
-
+// Berechnung der Note anhand der Weite eines Schuelers
 void Schueler::calculateNote() {
     float sprung1 = getSprung1();
     float sprung2 = getSprung2();
+    // ternary operator to take the best jump of the 2 jumps
     float besterSprung = sprung1 >= sprung2 ? sprung1 : sprung2;
 
     if (besterSprung < 3.00)
@@ -129,6 +134,7 @@ void Schueler::calculateNote() {
         NoteJump = KEINE_NOTE;
 }
 
+// Methode um Schueler auf der Konsole auszugeben, ebenso werden beide Notenmethoden hier aufgerufen
 void Schueler::anzeigen() {
     calculateIncrease();
     calculateNote();
@@ -146,6 +152,8 @@ private:
     Schueler bestImprovement;
 
 public:
+
+    //Forward Deklaration damit Compiler bescheid weiß
     void schuelerAnlegen(Schueler SchuelerNeu);
 
     void calculatePrice();
@@ -159,7 +167,7 @@ public:
     Lehrer() : schueler{}, anzahl_schueler(0), bestPerformance(Schueler()), bestImprovement(Schueler()) {
     }
 
-    // getter
+    // getter Methoden
     Schueler* getSchueler(int index) {
         if (index >= 0 && index < anzahl_schueler) {
             return &schueler[index];
@@ -179,7 +187,7 @@ public:
         return anzahl_schueler;
     }
 };
-
+// Hier wird die static int gesetzt damit das Array initalisiert werden kann
 int Lehrer::max_schueler = 50;
 
 // Schueler überschreiben mit letztem array eintrag
@@ -192,8 +200,8 @@ bool Lehrer::schuelerLoeschen(string vorname, string name) {
             return true;
         }
     }
-    return false;
     cout << "Schueler nicht gefunden!" << endl;
+    return false;
 }
 
 
@@ -221,7 +229,7 @@ Schueler* Lehrer::schuelerSuchenByName(string vorname, string nachname) {
     return nullptr; // damit programm nicht abstürzt, null check in main
 }
 
-// Funktion alle Schueler ausgeben
+// Funktion um alle Schueler auszugeben
 void Lehrer::alleSchuelerAnzeigen() {
     for (int i = 0; i < anzahl_schueler; i++) {
         schueler[i].anzeigen();
@@ -242,6 +250,8 @@ int main() {
     Lehrer meinLehrer;
 
     int auswahl = -1;
+
+    // EVAL Programm um mit while Schleifen und switch statements+ eine Konsolenapplikation zu bauen
 
     while (auswahl != 0) {
         cout << "=== Lehrer-Schueler-Verwaltung ===" << endl;
